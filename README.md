@@ -1,1 +1,1 @@
-# DataScienceCapstoneRepo
+# DataScienceCapstoneRepository
