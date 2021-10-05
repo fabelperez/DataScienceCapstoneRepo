@@ -106,9 +106,8 @@ class Deloitte:
     """
     A class that contains all of the scripts used for the exercise
     """
-
-    def __init__(self, file_path):
-        self.file_path = file_path 
+    def __init__(self):
+        self.file_path = None 
         self.f_df = None
         self.m_df = None
         self.all_df = None
@@ -148,6 +147,14 @@ class Deloitte:
         # Changing abbreviated state names to full names
         raw_data['state'] = raw_data['state'].map(abbrev_to_us_state)
 
+        # Adding in missing values
+        missing_states={'Ellicott City':'Maryland', 'Fredericksburg':'Virginia',\
+                        'North Potomac':'Maryland', 'Silver Spring':'Maryland',\
+                       'Washington':'District of Columbia'}
+        subset = raw_data.loc[raw_data['city'].isin(missing_states.keys()),'city']
+        raw_data.loc[subset.index,'state'] =\
+              raw_data.loc[subset.index,'city'].map(missing_states)
+
         # Normalizing/fixing timed features
         time_cols = ['gun_time', 'net_time', 'pace']
         for col in time_cols:
@@ -157,6 +164,34 @@ class Deloitte:
             raw_data[col] = raw_data[col] -datetime(1900, 1, 1)
             # Finding total time in seconds
             raw_data[col] = raw_data[col].dt.total_seconds()
+        
+        raw_data['diff_time'] = raw_data['gun_time']-raw_data['net_time']
 
 
+        raw_data['division_new'] = raw_data['age'].map(division_parser)
+
+        # Adding Gender Column
+        gender = self.file_path.split('.')[0].split('_')[-1].lower()
+        raw_data['gender'] = gender
+
+        # Normalizing string values (lower)
+        cols_lower = ['name', 'hometown','city','state']
+        for col in cols_lower:
+            raw_data[col] = raw_data[col].str.lower()
+
+        if gender=='females':
+            self.f_df = raw_data
+        elif gender=='males':
+            self.m_df = raw_data
         return raw_data
+
+
+    def combine(self):
+        if all([self.f_df.empty==False, self.m_df.empty==False]):
+            self.all_df = pd.concat(\
+                    [self.f_df, self.m_df],\
+                    axis=0).reset_index(drop=True)
+        else:
+            print("Please load both Female and Male Data Sets")
+
+
