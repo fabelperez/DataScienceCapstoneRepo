@@ -182,42 +182,23 @@ class Deloitte:
 
 
     def vis_q1(self):
-
         # Visualizing Violin Boxplot (All three: Females, Males, Combined)
         figure(figsize=(10,10), dpi=80)
         colors = ['red','blue','green'] 
-        net_array = np.array([self.f_df['net_time'],\
-                      self.m_df['net_time'],\
-                      self.all_df['net_time']])
-        vp = plt.violinplot(net_array, vert=False,
-                           showextrema=True,
-                           showmeans=True)
-        
-        med1,med2,med3 = np.quantile(net_array[0],.50),\
-                            np.quantile(net_array[1],.50),\
-                            np.quantile(net_array[2],.50)
-        
-        plt.scatter([med1,med2,med3], [1,2,3],\
-                        marker='o', color='white', s=50, zorder=3)
-        
-        q11,q21,q31 = np.quantile(net_array[0],.25),\
-                            np.quantile(net_array[1],.25),\
-                            np.quantile(net_array[2],.25)
-        q13,q23,q33 = np.quantile(net_array[0],.75),\
-                            np.quantile(net_array[1],.75),\
-                            np.quantile(net_array[2],.75)
-        
-        whiskers_min =\
-            np.array([q11,q21,q31]) - (np.array([q13,q23,q33]) - np.array([q11,q21,q31])) * 1.5
-        whiskers_max =\
-            np.array([q13,q23,q33]) + (np.array([q13,q23,q33]) - np.array([q11,q21,q31])) * 1.5
-        
+        net_array = np.array([self.f_df['net_time'], self.m_df['net_time'], self.all_df['net_time']])
+        vp = plt.violinplot(net_array, vert=False, showextrema=True, showmeans=True)
+        med1,med2,med3 = np.quantile(net_array[0],.50), np.quantile(net_array[1],.50), np.quantile(net_array[2],.50)
+        plt.scatter([med1,med2,med3], [1,2,3], marker='o', color='white', s=50, zorder=3) 
+        q11,q21,q31 = np.quantile(net_array[0],.25), np.quantile(net_array[1],.25), np.quantile(net_array[2],.25)
+        q13,q23,q33 = np.quantile(net_array[0],.75), np.quantile(net_array[1],.75), np.quantile(net_array[2],.75)
+
+        whiskers_min = np.array([q11,q21,q31]) - (np.array([q13,q23,q33]) - np.array([q11,q21,q31])) * 1.5
+        whiskers_max = np.array([q13,q23,q33]) + (np.array([q13,q23,q33]) - np.array([q11,q21,q31])) * 1.5
+
         plt.hlines([1,2,3],[q11,q21,q31], [q13,q23,q33], color='k', linestyle='-', lw=10)
         plt.hlines([1,2,3], whiskers_min, whiskers_max, color='aqua', linestyle='dashed', lw=3)
-        
         plt.yticks([1,2,3],['Females','Males','Combined'])
-        
-        #plt.tick_param(axis='y', labelrotation=90)
+
         for i in range(len(vp['bodies'])):
             vp['bodies'][i].set(facecolor=colors[i])
             vp['bodies'][i].set(edgecolor='black')
@@ -234,23 +215,18 @@ class Deloitte:
         subset = self.f_df[self.f_df.division_new.notnull()]
         subset = subset[subset.division_new>0]
         colors = subset['division_new']
-        scatter = plt.scatter(subset['age'], subset['net_time'],
-                    c=colors, alpha=0.35, label=set(colors))
-        mu,mi,med,mx =\
-            subset['net_time'].describe().loc[['mean','min','50%','max']]
+        scatter = plt.scatter(subset['age'], subset['net_time'], c=colors, alpha=0.35, label=set(colors))
+        mu,mi,med,mx = subset['net_time'].describe().loc[['mean','min','50%','max']]
         
         mod = subset['net_time'].mode()
-        meanli = plt.axhline(y=mu,color='red', linewidth=3, 
-                            linestyle='-', label='Mean: {0:.3f} Sec'.format(mu))
-        medli = plt.axhline(y=med,color='k', linewidth=4, 
-                            linestyle='dotted', label='Median: {0:.3f} Sec'.format(med))
+        meanli = plt.axhline(y=mu,color='red', linewidth=3, linestyle='-', label='Mean: {0:.3f} Sec'.format(mu))
+        medli = plt.axhline(y=med,color='k', linewidth=4, linestyle='dotted', label='Median: {0:.3f} Sec'.format(med))
         
-        #modeli = plt.axhline(y=mod,color='orange', linewidth=4, 
-        #                    linestyle='--', label='Mode: {0:.3f} Sec'.format(mod))
         modli=[]
         for i in range(len(mod)):
             modli.append(plt.axhline(y=mod[i],color='orange', linewidth=3, 
                             linestyle='--', label='Mode: {0:.3f} Sec'.format(mod[i])))
+        
         minli = plt.axhline(y=mi,color='aqua', linewidth=3, 
                             linestyle='--', label='Minimum: {0:.3f} Sec'.format(mi))
         maxli = plt.axhline(y=mx,color='purple', linewidth=3, 
@@ -585,8 +561,7 @@ class Deloitte:
         
         color = ['blue','orange','green','red','purple',\
                  'pink','gray', 'olive','cyan','lightseagreen','violet',\
-                'darkred', 'cornflowerblue','navy','darkcyan'] #list(np.random.choice(range(256), size=15))
-        
+                'darkred', 'cornflowerblue','navy','darkcyan']         
         color = color[:len(set(subset.state))]
         
         agg_stacked =\
@@ -630,10 +605,6 @@ class Deloitte:
         ax.set_xlabel('Divisions by Age' , size=20)
         ax.set_ylabel('Difference in Time (`gun_time` - `net_time`) in Seconds (s)', size=20)
         ax.legend(prop={'size':17})
-
-
-
-
 
         # Side by Side Box Plot comparison of gender race results by division
         figure(figsize=(10,10), dpi=80)
