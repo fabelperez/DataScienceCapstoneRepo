@@ -112,31 +112,20 @@ class Deloitte:
         self.m_df = None
         self.all_df = None
 
-
-
     def clean_data(self):
-        raw_data = pd.read_csv(\
-                'data/raw/{}'.format(self.file_path),\
-                encoding='latin-1', sep='\t')
+        raw_data = pd.read_csv('data/raw/{}'.format(self.file_path),encoding='latin-1', sep='\t')
         
         # renaming column names
         raw_data.columns = map(str.lower, raw_data.columns)
-        raw_data.rename(columns=\
-                {'div/tot':'div_total', 'ag':'age',\
-                'gun tim':'gun_time', 'net tim':'net_time'},\
-                inplace=True\
-                )
+        raw_data.rename(columns={'div/tot':'div_total', 'ag':'age','gun tim':'gun_time', 'net tim':'net_time'},\
+                inplace=True)
         clean_cols = raw_data.columns.tolist()
         clean_cols.pop(3) # removes `name` column
         clean_cols.pop(4) # removes `hometown` column
 
         # cleaning special symbols from columns to normalize data
         for col in clean_cols:
-            raw_data[col].replace(\
-                    to_replace='[#*^a-zA-Z ]',\
-                    value='',\
-                    regex=True,\
-                    inplace=True)
+            raw_data[col].replace(to_replace='[#*^a-zA-Z ]',value='',regex=True, inplace=True)
         raw_data['hometown'].replace(to_replace='[,.]', value='', regex=True, inplace=True)
 
         # Separating Hometown from the State
@@ -148,12 +137,10 @@ class Deloitte:
         raw_data['state'] = raw_data['state'].map(abbrev_to_us_state)
 
         # Adding in missing values
-        missing_states={'Ellicott City':'Maryland', 'Fredericksburg':'Virginia',\
-                        'North Potomac':'Maryland', 'Silver Spring':'Maryland',\
-                       'Washington':'District of Columbia'}
+        missing_states={'Ellicott City':'Maryland','Fredericksburg':'Virginia','North Potomac':'Maryland',\
+                'Silver Spring':'Maryland','Washington':'District of Columbia'}
         subset = raw_data.loc[raw_data['city'].isin(missing_states.keys()),'city']
-        raw_data.loc[subset.index,'state'] =\
-              raw_data.loc[subset.index,'city'].map(missing_states)
+        raw_data.loc[subset.index,'state']=raw_data.loc[subset.index,'city'].map(missing_states)
 
         # Normalizing/fixing timed features
         time_cols = ['gun_time', 'net_time', 'pace']
@@ -166,8 +153,6 @@ class Deloitte:
             raw_data[col] = raw_data[col].dt.total_seconds()
         
         raw_data['diff_time'] = raw_data['gun_time']-raw_data['net_time']
-
-
         raw_data['division_new'] = raw_data['age'].map(division_parser)
 
         # Adding Gender Column
@@ -178,7 +163,6 @@ class Deloitte:
         cols_lower = ['name', 'hometown','city','state']
         for col in cols_lower:
             raw_data[col] = raw_data[col].str.lower()
-
         if gender=='females':
             self.f_df = raw_data
         elif gender=='males':
